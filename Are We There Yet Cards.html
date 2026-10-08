@@ -1,0 +1,360 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Are We There Yet Cards</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a departure-board stage holds one card at a time; controls dock underneath. */
+  :root{
+    --bg:#EDF1F4; --surface:#FFFFFF; --surface-2:#E2E8ED; --fg:#16222E; --muted:#56687A;
+    --line:#C6D1DA; --accent:#0B6E78; --accent-ink:#FFFFFF; --amber:#A75F09;
+    --good:#1C7340; --bad:#A32B2B; --good-bg:#E0F0E6; --bad-bg:#F6E3E3;
+    --font:'Lexend',"Trebuchet MS",Verdana,sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#0D151E; --surface:#182533; --surface-2:#22323F; --fg:#E7EEF4; --muted:#9BAFBF;
+    --line:#2D3E4E; --accent:#4FD1C5; --accent-ink:#06202A; --amber:#E8B04B;
+    --good:#67CB8B; --bad:#F09191; --good-bg:#17342378; --bad-bg:#3A1F1F78; color-scheme:dark}}
+  :root[data-theme="dark"]{
+    --bg:#0D151E; --surface:#182533; --surface-2:#22323F; --fg:#E7EEF4; --muted:#9BAFBF;
+    --line:#2D3E4E; --accent:#4FD1C5; --accent-ink:#06202A; --amber:#E8B04B;
+    --good:#67CB8B; --bad:#F09191; --good-bg:#17342378; --bad-bg:#3A1F1F78; color-scheme:dark}
+
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font-family:var(--font);
+    font-size:18px;line-height:1.55;letter-spacing:.012em;margin:0}
+  .wrap{max-width:860px;margin:0 auto;padding-inline:16px;padding-block:22px 40px;
+    display:flex;flex-direction:column;gap:20px;min-width:0}
+
+  header{display:flex;flex-direction:column;gap:14px}
+  h1{font-size:clamp(1.3rem,4vw,1.75rem);font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:.9rem;margin:0}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab{font:inherit;font-size:.95rem;font-weight:500;cursor:pointer;
+    background:var(--surface);color:var(--fg);border:2px solid var(--line);
+    border-radius:999px;padding:9px 18px}
+  .tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font:inherit;font-size:.82rem;cursor:pointer;background:transparent;color:var(--muted);
+    border:1.5px solid var(--line);border-radius:999px;padding:5px 13px}
+  .chip[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--fg)}
+
+  /* ---- card stage ---- */
+  .stage{background:var(--surface);border:2px solid var(--line);border-radius:18px;
+    min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;padding:28px 20px;text-align:center;cursor:pointer;position:relative}
+  .stage:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+  .pic{font-size:clamp(4rem,17vw,6.5rem);line-height:1;display:block}
+  .word{font-size:clamp(1.6rem,6vw,2.4rem);font-weight:600;letter-spacing:-.01em}
+  .pron{font-family:var(--mono);font-size:1rem;color:var(--amber);
+    background:var(--surface-2);border-radius:8px;padding:4px 12px;display:inline-block}
+  .es{font-size:1.35rem;font-weight:500}
+  .note{font-size:.95rem;color:var(--muted);max-width:34ch}
+  .flip-hint{position:absolute;bottom:12px;left:0;right:0;font-size:.75rem;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.09em}
+  .cat{position:absolute;top:12px;left:16px;font-size:.72rem;text-transform:uppercase;
+    letter-spacing:.09em;color:var(--muted)}
+
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .btn{font:inherit;font-size:.95rem;font-weight:500;cursor:pointer;background:var(--surface);
+    color:var(--fg);border:2px solid var(--line);border-radius:12px;padding:10px 18px}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .count{font-family:var(--mono);font-size:.9rem;color:var(--muted);min-width:5.5ch;text-align:center}
+
+  /* ---- quiz ---- */
+  .qbar{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .qnum{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+  .score{font-family:var(--mono);font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+  .ask{font-size:clamp(1.15rem,4.4vw,1.5rem);font-weight:500;text-wrap:balance;margin:0;text-align:center}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:430px){.opts{grid-template-columns:1fr}}
+  .opt{font:inherit;cursor:pointer;background:var(--surface);color:var(--fg);
+    border:2px solid var(--line);border-radius:18px;padding:26px 14px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;min-height:150px;justify-content:center}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt:disabled{cursor:default}
+  .opt .pic{font-size:clamp(3rem,13vw,4.6rem)}
+  .opt .lbl{font-size:1.2rem;font-weight:600}
+  .opt.right{border-color:var(--good);background:var(--good-bg)}
+  .opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+  .mark{font-size:1.5rem;line-height:1}
+  .fb{text-align:center;font-weight:500;min-height:1.7em}
+  .fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
+  .blank{color:var(--accent);font-weight:700}
+
+  .done{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;
+    background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:34px 20px}
+  .big{font-size:2.6rem;font-weight:700;font-variant-numeric:tabular-nums}
+
+  @media (prefers-reduced-motion:no-preference){
+    .stage,.opt{transition:border-color .15s ease, background .15s ease}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Are we there yet? — travel words</h1>
+      <p class="sub">Unit 6 vocabulary: transport, places, travel verbs.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tabCards" role="tab" aria-selected="true" aria-controls="flash">Flashcards</button>
+      <button class="tab" id="tabQuiz" role="tab" aria-selected="false" aria-controls="quiz">This or that</button>
+    </div>
+  </header>
+
+  <!-- FLASHCARDS -->
+  <section id="flash" role="tabpanel" aria-labelledby="tabCards">
+    <div class="chips" id="chips"></div>
+    <div class="stage" id="card" tabindex="0" role="button" aria-label="Flashcard. Click to turn it over."></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="prev">← Back</button>
+      <span class="count" id="count">1 / 35</span>
+      <button class="btn primary" id="next">Next →</button>
+      <button class="btn" id="shuffle">Shuffle</button>
+    </div>
+  </section>
+
+  <!-- THIS OR THAT -->
+  <section id="quiz" role="tabpanel" aria-labelledby="tabQuiz" hidden>
+    <div class="qbar">
+      <span class="qnum" id="qnum"></span>
+      <span class="score" id="score"></span>
+    </div>
+    <p class="ask" id="ask"></p>
+    <div class="opts" id="opts"></div>
+    <p class="fb" id="fb"></p>
+    <div class="row"><button class="btn primary" id="qnext" hidden>Next question →</button></div>
+    <div class="done" id="done" hidden>
+      <div class="big" id="final"></div>
+      <p id="verdict" style="margin:0"></p>
+      <button class="btn primary" id="again">Play again</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var SUB = '<svg viewBox="0 0 120 70" style="width:1.05em;height:1.05em;vertical-align:middle" role="img" aria-label="submarine">'
+    + '<ellipse cx="58" cy="44" rx="45" ry="17" fill="#E3B23C"/>'
+    + '<rect x="48" y="19" width="20" height="13" rx="4" fill="#E3B23C"/>'
+    + '<rect x="56" y="8" width="4" height="12" fill="#8A8F98"/>'
+    + '<circle cx="43" cy="44" r="5.5" fill="#24323C"/><circle cx="64" cy="44" r="5.5" fill="#24323C"/>'
+    + '<path d="M103 44 L118 33 L118 55 Z" fill="#C2922C"/></svg>';
+
+  var WORDS = [
+    {en:'bike',ic:'🚲',pron:'báik',es:'bicicleta',note:'RIDE a bike',cat:'transport'},
+    {en:'motorbike',ic:'🏍️',pron:'MÓU-tor-baik',es:'moto',note:'RIDE a motorbike',cat:'transport'},
+    {en:'car',ic:'🚗',pron:'car',es:'auto',note:'DRIVE a car · go BY car',cat:'transport'},
+    {en:'bus',ic:'🚌',pron:'bas',es:'colectivo',note:'CATCH / GET / TAKE the bus',cat:'transport'},
+    {en:'coach',ic:'🚍',pron:'cóuch',es:'micro de larga distancia',note:'¡OJO! NO es “coche”',cat:'transport'},
+    {en:'train',ic:'🚆',pron:'tréin',es:'tren',note:'CATCH / GET / TAKE the train',cat:'transport'},
+    {en:'tram',ic:'🚊',pron:'tram',es:'tranvía',note:'va por la calle, con rieles',cat:'transport'},
+    {en:'underground',ic:'🚇',pron:'ÁN-der-graund',es:'subte',note:'en EE.UU.: subway',cat:'transport'},
+    {en:'plane',ic:'✈️',pron:'pléin',es:'avión',note:'FLY to London · go BY plane',cat:'transport'},
+    {en:'helicopter',ic:'🚁',pron:'HÉ-li-cop-ter',es:'helicóptero',note:'',cat:'transport'},
+    {en:'ship',ic:'🚢',pron:'ship',es:'barco grande',note:'travel BY ship',cat:'transport'},
+    {en:'ferry',ic:'⛴️',pron:'FÉ-rri',es:'ferry / balsa',note:'TAKE the ferry',cat:'transport'},
+    {en:'submarine',ic:SUB,pron:'SAB-ma-rín',es:'submarino',note:'va debajo del agua',cat:'transport'},
+
+    {en:'airport',ic:'🛫',pron:'ÉR-port',es:'aeropuerto',note:'AT the airport',cat:'places'},
+    {en:'bus stop',ic:'🚏',pron:'BAS-stop',es:'parada de colectivo',note:'wait AT the bus stop',cat:'places'},
+    {en:'car park',ic:'🅿️',pron:'CAR-park',es:'estacionamiento',note:'',cat:'places'},
+    {en:'platform',ic:'🛤️',pron:'PLÁT-form',es:'andén',note:'the train leaves FROM platform 9',cat:'places'},
+    {en:'port',ic:'⚓',pron:'port',es:'puerto',note:'para los barcos',cat:'places'},
+    {en:'train station',ic:'🚉',pron:'TRÉIN-stei-shon',es:'estación de tren',note:'',cat:'places'},
+
+    {en:'catch',ic:'🏃',pron:'catch',es:'tomar (un transporte)',note:'catch the bus / the train',cat:'verbs'},
+    {en:'drive',ic:'🚗',pron:'dráiv',es:'manejar',note:'drive a car / a bus',cat:'verbs'},
+    {en:'fly',ic:'✈️',pron:'flái',es:'volar, ir en avión',note:'fly to Madrid',cat:'verbs'},
+    {en:'get',ic:'🎟️',pron:'guet',es:'tomar (un transporte)',note:'get the bus',cat:'verbs'},
+    {en:'go',ic:'➡️',pron:'góu',es:'ir',note:'go BY car · go ON foot',cat:'verbs'},
+    {en:'ride',ic:'🚴',pron:'ráid',es:'andar en',note:'ride a bike / a motorbike / a horse',cat:'verbs'},
+    {en:'sail',ic:'⛵',pron:'séil',es:'navegar',note:'sail a boat',cat:'verbs'},
+    {en:'take',ic:'🤚',pron:'téik',es:'tomar (un transporte)',note:'take the train / the ferry',cat:'verbs'},
+    {en:'travel',ic:'🧭',pron:'TRÁ-vel',es:'viajar',note:'travel around Europe',cat:'verbs'},
+
+    {en:'journey',ic:'🗺️',pron:'YÉR-ni',es:'el viaje (el trayecto)',note:'a long journey',cat:'other'},
+    {en:'trip',ic:'🧳',pron:'trip',es:'el viaje, la salida',note:'a school trip',cat:'other'},
+    {en:'flight',ic:'🛬',pron:'fláit',es:'el vuelo',note:'',cat:'other'},
+    {en:'passenger',ic:'🧍',pron:'PÁ-sen-yer',es:'pasajero / pasajera',note:'',cat:'other'},
+    {en:'ticket',ic:'🎫',pron:'TÍ-ket',es:'boleto / pasaje',note:'buy a ticket',cat:'other'},
+    {en:'comfortable',ic:'🛋️',pron:'CÁMF-ta-bol',es:'cómodo',note:'',cat:'other'},
+    {en:'high-speed',ic:'⚡',pron:'hái-spíd',es:'de alta velocidad',note:'a high-speed train',cat:'other'}
+  ];
+
+  var P = {}; WORDS.forEach(function(w){P[w.en]=w;});
+  function pic(en){return {ic:P[en].ic,lbl:P[en].en};}
+
+  var QUIZ = [
+    {ask:'Which one is the ferry?',   opts:[pic('ferry'),pic('ship')], a:0},
+    {ask:'Which one is the tram?',    opts:[pic('train'),pic('tram')], a:1},
+    {ask:'Which one is the underground?', opts:[pic('underground'),pic('train')], a:0},
+    {ask:'Which one is the motorbike?', opts:[pic('bike'),pic('motorbike')], a:1},
+    {ask:'Which one is the helicopter?', opts:[pic('helicopter'),pic('plane')], a:0},
+    {ask:'Which one is the submarine?', opts:[pic('ship'),pic('submarine')], a:1},
+    {ask:'Which one is the coach?',   opts:[pic('coach'),pic('car')], a:0},
+    {ask:'Which one is the bus stop?', opts:[pic('car park'),pic('bus stop')], a:1},
+    {ask:'Which one is the platform?', opts:[pic('platform'),pic('port')], a:0},
+    {ask:'Which one is the port?',    opts:[pic('airport'),pic('port')], a:1},
+    {ask:'Where do you wait for a train? The …', opts:[pic('bus stop'),pic('train station')], a:1},
+
+    {ask:'I ___ my bike to school.', opts:[{lbl:'ride'},{lbl:'drive'}], a:0, why:'RIDE a bike, a motorbike, a horse.'},
+    {ask:'My mum can ___ a car.', opts:[{lbl:'sail'},{lbl:'drive'}], a:1, why:'DRIVE a car. SAIL is for boats.'},
+    {ask:'We’re going to ___ to Madrid.', opts:[{lbl:'fly'},{lbl:'sail'}], a:0, why:'FLY to a city = ir en avión.'},
+    {ask:'My uncle can ___ a boat.', opts:[{lbl:'ride'},{lbl:'sail'}], a:1, why:'SAIL a boat, a ship.'},
+    {ask:'Hurry up! We have to ___ the train.', opts:[{lbl:'catch'},{lbl:'drive'}], a:0, why:'CATCH / GET / TAKE the train.'},
+    {ask:'We’re going to go ___ car.', opts:[{lbl:'on'},{lbl:'by'}], a:1, why:'go BY car, BY bus, BY train.'},
+    {ask:'It’s very near, so we can go ___ foot.', opts:[{lbl:'by'},{lbl:'on'}], a:1, why:'ON foot is the only one that uses ON.'},
+    {ask:'Next Friday we have a school ___ .', opts:[{lbl:'trip'},{lbl:'journey'}], a:0, why:'TRIP = la salida. JOURNEY = el trayecto.'},
+    {ask:'The ___ from Buenos Aires to Madrid is twelve hours.', opts:[{lbl:'journey'},{lbl:'trip'}], a:0, why:'JOURNEY = el trayecto, el tiempo de viaje.'}
+  ];
+
+  var CATS=[{id:'all',t:'All 35'},{id:'transport',t:'Transport'},{id:'places',t:'Places'},
+            {id:'verbs',t:'Travel verbs'},{id:'other',t:'Other words'}];
+
+  var $=function(id){return document.getElementById(id);};
+  var deck=WORDS.slice(), i=0, flipped=false, cat='all';
+  var order=[], qi=0, right=0, answered=false;
+
+  /* ---------- flashcards ---------- */
+  function buildChips(){
+    CATS.forEach(function(c){
+      var b=document.createElement('button');
+      b.className='chip'; b.type='button'; b.textContent=c.t;
+      b.setAttribute('aria-pressed', c.id===cat?'true':'false');
+      b.onclick=function(){ cat=c.id; i=0; flipped=false; setDeck();
+        [].forEach.call($('chips').children,function(x,n){
+          x.setAttribute('aria-pressed', CATS[n].id===cat?'true':'false');});
+        draw(); };
+      $('chips').appendChild(b);
+    });
+  }
+  function setDeck(){ deck = cat==='all'?WORDS.slice():WORDS.filter(function(w){return w.cat===cat;}); }
+
+  function draw(){
+    var w=deck[i]; if(!w) return;
+    var c=$('card'); c.innerHTML='';
+    var tag=document.createElement('span'); tag.className='cat'; tag.textContent=w.cat; c.appendChild(tag);
+    var p=document.createElement('span'); p.className='pic'; p.innerHTML=w.ic; c.appendChild(p);
+    if(!flipped){
+      var es=document.createElement('div'); es.className='word'; es.textContent=w.es; c.appendChild(es);
+    } else {
+      var en=document.createElement('div'); en.className='word'; en.textContent=w.en; c.appendChild(en);
+      var pr=document.createElement('span'); pr.className='pron'; pr.textContent=w.pron; c.appendChild(pr);
+      if(w.note){var nt=document.createElement('div'); nt.className='note'; nt.textContent=w.note; c.appendChild(nt);}
+    }
+    var h=document.createElement('span'); h.className='flip-hint';
+    h.textContent = flipped ? 'click to go back to Spanish' : 'say it in English, then click';
+    c.appendChild(h);
+    $('count').textContent=(i+1)+' / '+deck.length;
+  }
+  $('card').onclick=function(){flipped=!flipped;draw();};
+  $('card').onkeydown=function(e){
+    if(e.key===' '||e.key==='Enter'){e.preventDefault();flipped=!flipped;draw();}
+    if(e.key==='ArrowRight'){e.preventDefault();step(1);}
+    if(e.key==='ArrowLeft'){e.preventDefault();step(-1);}
+  };
+  function step(d){ i=(i+d+deck.length)%deck.length; flipped=false; draw(); }
+  $('next').onclick=function(){step(1);};
+  $('prev').onclick=function(){step(-1);};
+  $('shuffle').onclick=function(){
+    for(var k=deck.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=deck[k];deck[k]=deck[j];deck[j]=t;}
+    i=0;flipped=false;draw();
+  };
+
+  /* ---------- this or that ---------- */
+  function startQuiz(){
+    order=QUIZ.map(function(_,n){return n;});
+    for(var k=order.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var t=order[k];order[k]=order[j];order[j]=t;}
+    qi=0;right=0;answered=false;$('done').hidden=true;askQ();
+  }
+  function askQ(){
+    var q=QUIZ[order[qi]];
+    answered=false;
+    $('qnum').textContent='Question '+(qi+1)+' of '+order.length;
+    $('score').textContent=right+' correct';
+    $('fb').textContent='';$('fb').className='fb';
+    $('qnext').hidden=true;
+    var ask=$('ask'); ask.innerHTML='';
+    q.ask.split('___').forEach(function(part,n){
+      if(n){var b=document.createElement('span');b.className='blank';b.textContent=' ______ ';ask.appendChild(b);}
+      ask.appendChild(document.createTextNode(part));
+    });
+    var box=$('opts'); box.innerHTML='';
+    q.opts.forEach(function(o,n){
+      var b=document.createElement('button');
+      b.className='opt'; b.type='button';
+      if(o.ic){
+        var p=document.createElement('span');p.className='pic';p.innerHTML=o.ic;b.appendChild(p);
+        b.setAttribute('aria-label',o.lbl);           // the name is hidden until she answers
+      } else {
+        var l=document.createElement('span'); l.className='lbl'; l.textContent=o.lbl; b.appendChild(l);
+      }
+      b.onclick=function(){answer(n,b);};
+      box.appendChild(b);
+    });
+  }
+  function answer(n,btn){
+    if(answered) return; answered=true;
+    var q=QUIZ[order[qi]];
+    var kids=$('opts').children;
+    [].forEach.call(kids,function(k,n2){
+      k.disabled=true;
+      if(q.opts[n2].ic && !k.querySelector('.lbl')){            // reveal both names now
+        var l=document.createElement('span'); l.className='lbl'; l.textContent=q.opts[n2].lbl; k.appendChild(l);
+      }
+    });
+    var ok = n===q.a;
+    if(ok){right++; btn.classList.add('right'); $('fb').textContent='Yes! '+(q.why||''); $('fb').className='fb ok';}
+    else{
+      btn.classList.add('wrong'); kids[q.a].classList.add('right');
+      $('fb').textContent='Not this one. It’s “'+q.opts[q.a].lbl+'”. '+(q.why||''); $('fb').className='fb no';
+    }
+    $('score').textContent=right+' correct';
+    $('qnext').hidden=false; $('qnext').focus();
+  }
+  $('qnext').onclick=function(){
+    qi++;
+    if(qi>=order.length){
+      $('ask').textContent='';$('opts').innerHTML='';$('fb').textContent='';
+      $('qnum').textContent='';$('score').textContent='';$('qnext').hidden=true;
+      $('final').textContent=right+' / '+order.length;
+      $('verdict').textContent = right===order.length ? 'Perfect. Every single one.'
+        : right>=order.length-3 ? 'Very good — just a couple to look at again.'
+        : 'Good try. Go back to the flashcards for the ones you missed.';
+      $('done').hidden=false; $('again').focus();
+    } else askQ();
+  };
+  $('again').onclick=startQuiz;
+
+  /* ---------- tabs ---------- */
+  function show(which){
+    var cards = which==='cards';
+    $('flash').hidden=!cards; $('quiz').hidden=cards;
+    $('tabCards').setAttribute('aria-selected',cards?'true':'false');
+    $('tabQuiz').setAttribute('aria-selected',cards?'false':'true');
+    if(!cards && !order.length) startQuiz();
+  }
+  $('tabCards').onclick=function(){show('cards');};
+  $('tabQuiz').onclick=function(){show('quiz');};
+
+  function boot(s){
+    s=s||{};
+    cat=s.cat||'all'; setDeck();
+    i=Math.min(s.i||0, deck.length-1); flipped=!!s.flipped;
+    buildChips(); draw();
+    if(s.tab==='quiz'){show('quiz');}
+  }
+  if(window.claude&&window.claude.hot&&window.claude.hot.ready){
+    window.claude.hot.snapshot(function(){
+      return {cat:cat,i:i,flipped:flipped,tab:$('quiz').hidden?'cards':'quiz'};
+    });
+    window.claude.hot.ready(boot);
+  } else boot({});
+})();
+</script>
+
+</body></html>
